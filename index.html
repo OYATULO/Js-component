@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="getall()">getallpost</button>
+    <button onclick="createPost()">createPost</button>
+
+    <a href="#/" >home</a>
+    <a href="#/about"  >about</a>
+    <a href="contact.html" >about</a>
+
+
+    <!-- <div class="main"> -->
+          <div class="main">
+
+          </div>
+          <div id="app">
+
+        </div>
+         
+           <!-- <script src="./comp/home.js" type="text/html" ></script> -->
+        <!-- <script src="./maim.js" type="module"></script> -->
+          <script src="./script.js"  type="module"></script>
+    <script>
+           var t="";
+           var main= document.querySelector(".main");
+           var xhttp = new XMLHttpRequest();
+             function getall(){
+                var foottb ="";
+                var maintb="";
+                var url = "http://localhost:5000/get-all-post";
+                 xhttp.onreadystatechange=function(){
+                    if(this.readyState==4 && this.status==200){
+                       var json  = JSON.parse(this.responseText);
+                       var table  = `<table>
+                        <thead>
+                            <tr>
+                                <th >PostID(pk)</th>
+                                <th >Title</th>
+                                <th >Content</th>
+                                <th >Crud operation</th>
+                            </tr>
+                        </thead><tbody>`;
+                            json.map(element => {
+                                maintb+= ` <tr>
+                                <td>`+element.postId+`</td>
+                                <td>`+element.title+`</td>
+                                <td>`+element.content+`</td>
+                                <td>
+                                    <button class="btn  btn-dark  mx-3 my-0" onclick="showpost(`+element.postId+`,'`+element.title+`','`+element.content+`')"s>update</button>
+                                    <button class="btn btn-secondary" onclick="deletebyid(this,`+element.postId+`)"> Deleted</button>    
+                                </td>
+                            </tr>`
+                        });
+                       
+                        foottb=`</tbody></table><button onclick="goback();">Reset</button>`;
+                        main.innerHTML=table+maintb+foottb;
+                    }
+                 }
+                 xhttp.open("GET",url);
+                 xhttp.setRequestHeader("Content-Type", "application/json");
+                 xhttp.send();
+                   
+        
+            }
+           function deletebyid(el,id){
+
+                    const jsontext={ postId:id  }
+                    xhttp.onreadystatechange=function(){
+                        if(this.readyState==4 && this.status==200){
+                            alert(this.responseText);
+                            el.parentElement.parentElement.remove();
+                        }
+                    }
+                    xhttp.open("DELETE","https://localhost:7292/delete-byid/"+id,true);
+                    xhttp.setRequestHeader("Content-Type","application/json; charset=UTF-8");
+                    xhttp.send();
+                   
+            }
+            function getRestform(){
+                    const postToCreate={
+                        title:createform.title.value,
+                        content:createform.content.value
+                    };
+                    xhttp.onreadystatechange=function(){
+                        if(this.readyState==4 && this.status==200){
+                            //alert(this.responseText);
+                            getall();
+                        }
+                    }
+                    xhttp.open("POST","https://localhost:7292/create-post",true);
+                    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                    xhttp.send(JSON.stringify(postToCreate));
+            }
+
+            function createPost(){
+                t =  main.innerHTML;
+                main.innerHTML=`  <form action="javascript:void(0)" name="createform" onsubmit="return getRestform();">
+                    <input type="text" name="title">
+                    <input type="text" name="content">
+                    <input type="submit" value="create">
+                    <input  type="button" id="" onclick="goto()" value="cancel">
+            </form>`;
+            }
+            function showpost(postId,title,content){
+                t =  main.innerHTML;
+                main.innerHTML=`  <form action="javascript:void(0)" name="createform" onsubmit="return editPost(`+postId+`);">
+                    <input type="text" name="title" value="`+title+`">
+                    <input type="text" name="content" value="`+content+`">
+                    <input type="submit" value="Update">
+                    <input  type="button" id="" onclick="goto()" value="cancel">
+            </form>`;
+            }
+            function editPost(postId){
+                const jstext={
+                    postId:postId,
+                    title:createform.title.value,
+                    content:createform.content.value
+                }
+                xhttp.onreadystatechange=function(){
+                     if(this.readyState==4 && this.status==200){
+                        getall();
+                     }
+                }
+                xhttp.open("PUT","https://localhost:7292/update-post",true);
+                xhttp.setRequestHeader("Content-Type","application/json; charset=utf-8");
+                xhttp.send(JSON.stringify(jstext));
+            }
+
+           function  goback(){
+                    t =  main.innerHTML;
+                    main.innerHTML="";
+            }
+            function goto(){
+                main.innerHTML=t;
+            }
+    </script>
+</body>
+</html>
